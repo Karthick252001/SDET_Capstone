@@ -1,0 +1,47 @@
+import time
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# Fixture to initialize the WebDriver
+@pytest.fixture(scope="module")
+def driver():
+    driver = webdriver.Chrome()  # You can use other WebDriver options
+    yield driver
+    driver.quit()
+
+# Test Case
+def test_flipkart_login(driver):
+    # Step 1: Launch the URL
+    url = "https://www.flipkart.com/"
+    driver.get(url)
+
+    # Step 2: Verify the Login button is present
+    login_button = driver.find_element(By.XPATH, "//button[text()='Login']")
+    assert login_button.is_displayed()
+
+    # Step 3: Click on the Login button
+    login_button.click()
+
+    # Step 4: Enter Phone Number and click on Request OTP button
+    phone_input = driver.find_element(By.XPATH, "//input[@class='_2IX_2- VJZDxU']")
+    phone_input.send_keys("1234567890")
+    request_otp_button = driver.find_element(By.XPATH, "//button[@class='_2KpZ6l _2HKlqd _3zsi3k']")
+    request_otp_button.click()
+
+    # Step 5: Verify the confirmation message
+    mobile_number = "1234567890"  # Replace with the actual phone number used
+    confirmation_message_xpath = f"//div[text()='Please enter the OTP sent to {mobile_number}']"
+
+    try:
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, confirmation_message_xpath)))
+        confirmation_message = driver.find_element(By.XPATH, confirmation_message_xpath)
+        assert confirmation_message.is_displayed()
+    except Exception:
+        pytest.fail("Confirmation message not found or not displayed")
+
+if __name__ == "__main__":
+    pytest.main(["-v", "test_flipkart_login.py"])
