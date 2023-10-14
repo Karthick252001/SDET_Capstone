@@ -1,0 +1,47 @@
+import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+@pytest.fixture(scope="module")
+def setup():
+    driver = webdriver.Chrome()
+    yield driver  # Provide the driver to the test
+    driver.quit()  # Teardown: close the browser
+
+@pytest.mark.usefixtures("setup")
+class TestScenario:
+
+    def test_verify_title(self, setup):
+       
+        setup.get("https://automationpanda.com/2021/12/29/want-to-practice-test-automation-try-these-demo-sites/")
+      
+        assert "Want to Practice Test Automation? Try These Demo Sites!" in setup.title
+
+    def test_click_speaking_and_verify_title(self, setup):
+      
+        speaking_link = setup.find_element(By.PARTIAL_LINK_TEXT, "Speaking")
+        speaking_link.click()
+
+      
+        assert "Speaking" in setup.title
+
+    def test_verify_keynote_addresses(self, setup):
+       
+        WebDriverWait(setup, 10).until(EC.presence_of_element_located((By.XPATH, "//h3[contains(text(), 'Keynote Addresses')]"))
+
+       
+        keynote_element = setup.find_element(By.XPATH, "//h3[contains(text(), 'Keynote Addresses')]")
+        assert keynote_element.is_displayed()
+        assert "Some Keynote Addresses Text" in keynote_element.text  # Replace with actual expected text
+
+    def test_verify_conference_talks(self, setup):
+      
+        WebDriverWait(setup, 10).until(EC.presence_of_element_located((By.XPATH, "//h3[contains(text(), 'Conference Talks')]"))
+
+        
+        conference_element = setup.find_element(By.XPATH, "//h3[contains(text(), 'Conference Talks')]")
+        assert conference_element.is_displayed()
+        assert "Some Conference Talks Text" in conference_element.text  # Replace with actual expected text
+
